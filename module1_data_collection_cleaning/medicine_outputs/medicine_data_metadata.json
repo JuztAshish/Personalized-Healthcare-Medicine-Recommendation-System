@@ -1,0 +1,12 @@
+{
+  "source_file": "cleaned_medicine.csv",
+  "medicine_name_column": "medicine_name",
+  "description_column": null,
+  "use_or_indication_column": "uses",
+  "text_source_columns": [
+    "uses"
+  ],
+  "rows": 11741,
+  "tfidf_features": 22284,
+  "warning": "Text similarity is not clinical suitability, interchangeability, safety, or a prescription."
+}
