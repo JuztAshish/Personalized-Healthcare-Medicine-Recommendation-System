@@ -1,1 +1,6 @@
 .venv/datasets/processed/Cleaned_Dataset_validated.csv
+.venv/
+models/
+datasets/
+*.pkl
+*.csv
