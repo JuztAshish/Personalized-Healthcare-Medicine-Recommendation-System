@@ -1,0 +1,6 @@
+/* Member 4 - Custom CSS.
+   Task 2: minimal spacing to keep pages readable.
+   Icons/images will be added later after user provides links. */
+body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+main { min-height: 60vh; padding-top: 0.5rem; }
+footer { padding-bottom: 1rem; }

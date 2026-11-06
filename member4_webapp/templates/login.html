@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <h1 class="card-title h4">Login</h1>
+        <p class="text-muted small">Enter your details to continue.</p>
+        <form method="get" action="/login">
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">User Type</label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <hr>
+        <p class="small text-center mb-1">Don't have an account? <a href="/register">Register</a></p>
+        <p class="small text-center"><a href="/">Back to Home</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
