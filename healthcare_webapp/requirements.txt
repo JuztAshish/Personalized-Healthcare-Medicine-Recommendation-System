@@ -1,0 +1,4 @@
+# Member 4 Web Application - Dependencies
+# Keep this separate from team root requirements.txt so Member 4 work is clear.
+# These are NOT yet installed - install only with user approval.
+Flask==3.0.0
