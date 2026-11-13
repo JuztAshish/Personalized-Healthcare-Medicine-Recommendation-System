@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h1 class="h4">Admin Panel</h1>
+    <p>Welcome, <strong>{{ session['user']['name'] }}</strong> (admin).</p>
+    <p class="mb-3">Only approved admins can access this area.</p>
+    <a class="btn btn-primary" href="/admin/promote">Promote a User to Admin</a>
+    <a class="btn btn-outline-secondary" href="/dashboard">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}
