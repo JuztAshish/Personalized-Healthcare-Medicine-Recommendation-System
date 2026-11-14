@@ -1,0 +1,148 @@
+======================================================================
+PHASE 4 AUTOMATED TEST EXECUTION LOG
+Project: Personalized Healthcare Medicine Recommendation System
+Module: Module 3 – Personalized Medicine Recommendation Engine
+Date: November 14, 2026
+Test Framework: pytest 9.1.1 | Python 3.10.11 (win32)
+Root Directory: D:\Zidio-Internship\Personalized-Healthcare-Medicine-Recommendation-System
+======================================================================
+
+----------------------------------------------------------------------
+1. PYTEST REGRESSION TEST SUITE (tests/test_medicine_recommender.py)
+----------------------------------------------------------------------
+
+collecting ... collected 42 items
+
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_successful_production_initialization PASSED [  2%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_dataset_column_schema PASSED [  4%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_csv_to_matrix_exact_row_alignment PASSED [  7%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_missing_dataset_path_raises_file_not_found PASSED [  9%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_missing_matrix_path_raises_file_not_found PASSED [ 11%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_invalid_pipeline_mode_raises_value_error PASSED [ 14%]
+tests/test_medicine_recommender.py::TestInitializationAndLoading::test_matrix_row_mismatch_raises_value_error PASSED [ 16%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_lowercase_normalization PASSED [ 19%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_whitespace_normalization PASSED [ 21%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_alphanumeric_and_medical_symbol_retention PASSED [ 23%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_none_and_empty_normalization PASSED [ 26%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_stem_text_porter_stemmer PASSED [ 28%]
+tests/test_medicine_recommender.py::TestQueryPreprocessing::test_production_vocabulary_compatibility PASSED [ 30%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_valid_disease_query PASSED [ 33%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_empty_and_whitespace_query PASSED [ 35%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_none_query PASSED [ 38%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_unknown_disease_query PASSED [ 40%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_top_k_limits PASSED [ 42%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_top_k_zero_or_negative PASSED [ 45%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_similarity_score_validity_and_bounds PASSED [ 47%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_descending_similarity_ranking_order PASSED [ 50%]
+tests/test_medicine_recommender.py::TestRecommendationEngine::test_match_explanation_content PASSED [ 52%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_allergy_keyword_detection PASSED [ 54%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_danger_flag_generation PASSED [ 57%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_allergy_filtering_and_no_leakage PASSED [ 59%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_missing_composition_handling PASSED [ 61%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_clinical_disclaimer_presence_and_caution PASSED [ 64%]
+tests/test_medicine_recommender.py::TestAllergyScreening::test_no_false_clinical_safety_claims PASSED [ 66%]
+tests/test_medicine_recommender.py::TestPatientConditionWarnings::test_condition_side_effect_overlap PASSED [ 69%]
+tests/test_medicine_recommender.py::TestPatientConditionWarnings::test_preliminary_warning_label_not_contraindication PASSED [ 71%]
+tests/test_medicine_recommender.py::TestPatientConditionWarnings::test_missing_side_effects_handling PASSED [ 73%]
+tests/test_medicine_recommender.py::TestPatientConditionWarnings::test_multiple_patient_conditions PASSED [ 76%]
+tests/test_medicine_recommender.py::TestExperimentalRanking::test_review_sentiment_normalization PASSED [ 78%]
+tests/test_medicine_recommender.py::TestExperimentalRanking::test_review_sentiment_missing_defaults_to_neutral PASSED [ 80%]
+tests/test_medicine_recommender.py::TestExperimentalRanking::test_exact_85_15_formula PASSED [ 83%]
+tests/test_medicine_recommender.py::TestExperimentalRanking::test_four_decimal_rounding_consistency PASSED [ 85%]
+tests/test_medicine_recommender.py::TestExperimentalRanking::test_separation_of_scores PASSED [ 88%]
+tests/test_medicine_recommender.py::TestErrorHandlingAndRobustness::test_uninitialized_engine_raises_runtime_error PASSED [ 90%]
+tests/test_medicine_recommender.py::TestErrorHandlingAndRobustness::test_malformed_patient_allergies_handled_gracefully PASSED [ 92%]
+tests/test_medicine_recommender.py::TestErrorHandlingAndRobustness::test_malformed_patient_conditions_handled_gracefully PASSED [ 95%]
+tests/test_medicine_recommender.py::TestErrorHandlingAndRobustness::test_isolated_mock_dataset_execution PASSED [ 97%]
+tests/test_medicine_recommender.py::TestErrorHandlingAndRobustness::test_custom_index_tfidf_and_count_vectorizer PASSED [100%]
+
+============================= 42 passed in 7.02s ==============================
+
+----------------------------------------------------------------------
+2. CROSS-MODULE VERIFICATION & FLASK APP TEST RESULTS
+----------------------------------------------------------------------
+
+[Module 1] datasets/processed/cleaned_medicine_prepared.csv: 11,741 records, 12 cols -> LOADED (OK)
+[Module 1] module1_data_collection_cleaning/medicine_outputs/medicine_tfidf_vectorizer.joblib: 22,284 features -> LOADED (OK)
+[Module 1] module1_data_collection_cleaning/medicine_outputs/medicine_tfidf_matrix.npz: (11741, 22284) -> LOADED (OK)
+[Module 1] Row Alignment Check: 11,741 == 11,741 -> PERFECT (OK)
+
+[Module 2] models/best_model.pkl: GaussianNB, 671 classes -> LOADED (OK)
+[Module 2] models/disease_encoder.pkl: LabelEncoder, 686 classes -> LOADED (OK)
+[Module 2] Sample Inference: 377 symptom features -> 'somatization disorder' -> PREDICTION SUCCESS (OK)
+
+[Module 3] healthcare_webapp/services/medicine_recommender.py: MedicineRecommender -> FUNCTIONAL (OK)
+[Module 3] Top-3 Recommendations for 'somatization disorder':
+    1. Opiprime 50 Tablet | Sim: 0.2515 | ExpScore: 0.2948
+    2. Opiprol 50 Tablet  | Sim: 0.2515 | ExpScore: 0.2903
+    3. Opiprime 100 Tablet| Sim: 0.2491 | ExpScore: 0.2117
+
+[Module 4] healthcare_webapp/app.py: Flask test_client() route verification:
+    GET '/'         -> HTTP 200 OK (Home Landing)
+    GET '/about'    -> HTTP 200 OK (About Page)
+    GET '/login'    -> HTTP 200 OK (Login Form)
+    GET '/register' -> HTTP 200 OK (Register Form)
+
+----------------------------------------------------------------------
+3. FIVE DISEASE BENCHMARK QUERIES (INDEPENDENT AUDIT)
+----------------------------------------------------------------------
+
+1. Query: "Asthma" (top_k=5)
+   - Romilast B 10 Tablet  | Sim: 0.3521 | Sent: 0.7800 | ExpScore: 0.4163
+   - Abmac Tablet          | Sim: 0.3497 | Sent: 0.1650 | ExpScore: 0.3220
+   - Alatro Tablet         | Sim: 0.3497 | Sent: 0.2650 | ExpScore: 0.3370
+   - Telekast-Plus Tablet  | Sim: 0.3405 | Sent: 0.3300 | ExpScore: 0.3389
+   - Montemac Plus Tablet  | Sim: 0.3405 | Sent: 0.8350 | ExpScore: 0.4147
+
+2. Query: "Diabetes" (top_k=5)
+   - Zoryl 1 Tablet        | Sim: 0.2395 | Sent: 0.6800 | ExpScore: 0.3056
+   - Zoryl 4 Tablet        | Sim: 0.2395 | Sent: 0.3350 | ExpScore: 0.2538
+   - Zoryl 3 Tablet        | Sim: 0.2395 | Sent: 0.0000 | ExpScore: 0.2036
+   - Zoryl 2 Tablet        | Sim: 0.2395 | Sent: 0.7100 | ExpScore: 0.3101
+   - Zoryl 0.5 Tablet      | Sim: 0.2395 | Sent: 0.3350 | ExpScore: 0.2538
+
+3. Query: "Hypertension" (top_k=5)
+   - Telma-R 2.5 Tablet    | Sim: 0.2174 | Sent: 0.8350 | ExpScore: 0.3100
+   - Telma-R 5 Tablet      | Sim: 0.2174 | Sent: 1.0000 | ExpScore: 0.3348
+   - Telma H Tablet        | Sim: 0.2156 | Sent: 0.5950 | ExpScore: 0.2725
+   - Telma-AM Tablet       | Sim: 0.2156 | Sent: 0.6200 | ExpScore: 0.2763
+   - Telma-AM Tablet       | Sim: 0.2156 | Sent: 0.6850 | ExpScore: 0.2860
+
+4. Query: "Migraine" (top_k=5)
+   - Grenil Tablet         | Sim: 0.2927 | Sent: 0.5300 | ExpScore: 0.3283
+   - Vasograin Tablet      | Sim: 0.2886 | Sent: 0.6200 | ExpScore: 0.3383
+   - Metopar Tablet        | Sim: 0.2886 | Sent: 0.6300 | ExpScore: 0.3398
+   - Paramet Tablet        | Sim: 0.2886 | Sent: 0.6400 | ExpScore: 0.3413
+   - Sunapro Tablet        | Sim: 0.2861 | Sent: 0.6850 | ExpScore: 0.3459
+
+5. Query: "Vomiting" (top_k=5)
+   - Emeset 8 Tablet       | Sim: 0.3255 | Sent: 0.5550 | ExpScore: 0.3599
+   - Emeset 4 Tablet       | Sim: 0.3255 | Sent: 0.6050 | ExpScore: 0.3674
+   - Ondem 4 Tablet        | Sim: 0.3243 | Sent: 0.5700 | ExpScore: 0.3612
+   - Ondem 8 Tablet        | Sim: 0.3243 | Sent: 0.6100 | ExpScore: 0.3672
+   - Vomikind Injection    | Sim: 0.3164 | Sent: 0.5000 | ExpScore: 0.3439
+
+----------------------------------------------------------------------
+4. ALLERGY & PRELIMINARY PRECAUTION VERIFICATION
+----------------------------------------------------------------------
+
+- Allergy match test: Query "Bacterial infections", Allergy ["Amoxycillin"], filter_allergies=False
+  -> Detected in Miliclav Tablet (Amoxycillin 500mg + Clavulanic Acid 125mg).
+  -> Alert: DANGER - ALLERGY MATCH (VERIFIED).
+
+- Allergy exclusion test: filter_allergies=True
+  -> Excluded Miliclav Tablet; 0 matching allergen items remained (VERIFIED).
+  -> Non-allergenic candidates: OF 200 Tablet, G-Cin Tablet, Swich O Tablet.
+
+- Condition precaution test: Condition ["Vomiting"]
+  -> Correctly flagged documented side effects: "vomiting" as Preliminary Warning (VERIFIED).
+
+- Empty / Whitespace / Nonexistent query test:
+  -> All return [] without exceptions (VERIFIED).
+
+- Top-N Depth Consistency:
+  -> k in [1, 2, 3, 5, 8, 10] each returned exactly k items (VERIFIED).
+
+======================================================================
+ALL 42 AUTOMATED TESTS & CROSS-MODULE VERIFICATION PASSED (100% SUCCESS)
+======================================================================
