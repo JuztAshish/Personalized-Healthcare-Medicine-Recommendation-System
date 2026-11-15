@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h1 class="h4">User Dashboard</h1>
+    <p>Welcome, <strong>{{ session['user']['name'] }}</strong>.</p>
+    <p class="mb-1"><strong>Email:</strong> {{ session['user']['email'] }}</p>
+    <p class="mb-3"><strong>Role (session):</strong> {{ session['user']['role'] }}</p>
+    <p class="text-muted small">This is a placeholder dashboard. Patient profile, prediction history, and recommendations will be added in later tasks.</p>
+  </div>
+</div>
+{% endblock %}
