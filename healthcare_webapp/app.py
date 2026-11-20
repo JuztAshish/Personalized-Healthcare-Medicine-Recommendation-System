@@ -10,6 +10,20 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from config import SECRET_KEY
 from db import users, ping_db
 
+PROFILE_FIELDS = [
+    ("age", "Age"),
+    ("gender", "Gender"),
+    ("blood_group", "Blood Group"),
+    ("phone", "Phone"),
+    ("allergies", "Known Allergies"),
+    ("medical_history", "Existing Conditions / Medical History"),
+    ("current_medications", "Current Medications"),
+    ("emergency_contact", "Emergency Contact"),
+]
+
+GENDER_CHOICES = ["", "Male", "Female", "Other", "Prefer not to say"]
+BLOOD_GROUP_CHOICES = ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
 
@@ -143,7 +157,74 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    profile = {}
+    try:
+        user = users.find_one({"email": session["user"]["email"]}, {"profile": 1})
+        if user:
+            profile = user.get("profile") or {}
+    except PyMongoError as e:
+        flash(f"Database error: {e}", "danger")
+    return render_template("dashboard.html", profile=profile)
+
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    email = session["user"]["email"]
+    profile_data = {}
+
+    if request.method == "POST":
+        age_raw = request.form.get("age", "").strip()
+        age = ""
+        if age_raw:
+            try:
+                age_val = int(age_raw)
+                if age_val < 0 or age_val > 120:
+                    flash("Age must be between 0 and 120.", "danger")
+                    return redirect(url_for("profile"))
+                age = str(age_val)
+            except ValueError:
+                flash("Age must be a valid number.", "danger")
+                return redirect(url_for("profile"))
+
+        gender = request.form.get("gender", "").strip()
+        blood_group = request.form.get("blood_group", "").strip()
+        if gender not in GENDER_CHOICES:
+            gender = ""
+        if blood_group not in BLOOD_GROUP_CHOICES:
+            blood_group = ""
+
+        profile_data = {
+            "age": age,
+            "gender": gender,
+            "blood_group": blood_group,
+            "phone": request.form.get("phone", "").strip(),
+            "allergies": request.form.get("allergies", "").strip(),
+            "medical_history": request.form.get("medical_history", "").strip(),
+            "current_medications": request.form.get("current_medications", "").strip(),
+            "emergency_contact": request.form.get("emergency_contact", "").strip(),
+        }
+
+        try:
+            users.update_one({"email": email}, {"$set": {"profile": profile_data}})
+            flash("Profile saved successfully.", "success")
+            return redirect(url_for("profile"))
+        except PyMongoError as e:
+            flash(f"Database error: {e}", "danger")
+
+    try:
+        user = users.find_one({"email": email}, {"profile": 1})
+        if user:
+            profile_data = user.get("profile") or {}
+    except PyMongoError as e:
+        flash(f"Database error: {e}", "danger")
+
+    return render_template(
+        "profile.html",
+        profile=profile_data,
+        gender_choices=GENDER_CHOICES,
+        blood_group_choices=BLOOD_GROUP_CHOICES,
+    )
 
 
 @app.route("/admin")

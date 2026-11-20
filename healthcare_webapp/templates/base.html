@@ -16,6 +16,7 @@
         <a class="nav-link" href="/about">About</a>
         {% if session.get('user') %}
           <a class="nav-link" href="/dashboard">Dashboard</a>
+          <a class="nav-link" href="/profile">Profile</a>
           {% if session['user'].get('role') == 'admin' %}
             <a class="nav-link" href="/admin">Admin</a>
             <a class="nav-link" href="/admin/promote">Promote</a>

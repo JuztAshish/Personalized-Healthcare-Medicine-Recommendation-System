@@ -1,12 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-  <div class="card-body">
-    <h1 class="h4">User Dashboard</h1>
-    <p>Welcome, <strong>{{ session['user']['name'] }}</strong>.</p>
-    <p class="mb-1"><strong>Email:</strong> {{ session['user']['email'] }}</p>
-    <p class="mb-3"><strong>Role (session):</strong> {{ session['user']['role'] }}</p>
-    <p class="text-muted small">This is a placeholder dashboard. Patient profile, prediction history, and recommendations will be added in later tasks.</p>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h1 class="h4">User Dashboard</h1>
+        <p>Welcome, <strong>{{ session['user']['name'] }}</strong>.</p>
+        <p class="mb-1"><strong>Email:</strong> {{ session['user']['email'] }}</p>
+        <p class="mb-3"><strong>Role (session):</strong> {{ session['user']['role'] }}</p>
+        <p class="text-muted small mb-0">Prediction history and recommendations will be added in later tasks.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">Patient Profile</h2>
+        {% if profile and (profile.get('age') or profile.get('gender') or profile.get('blood_group') or profile.get('phone') or profile.get('allergies') or profile.get('medical_history') or profile.get('current_medications') or profile.get('emergency_contact')) %}
+          <ul class="list-unstyled mb-3 small">
+            {% if profile.get('age') %}<li><strong>Age:</strong> {{ profile.get('age') }}</li>{% endif %}
+            {% if profile.get('gender') %}<li><strong>Gender:</strong> {{ profile.get('gender') }}</li>{% endif %}
+            {% if profile.get('blood_group') %}<li><strong>Blood Group:</strong> {{ profile.get('blood_group') }}</li>{% endif %}
+            {% if profile.get('phone') %}<li><strong>Phone:</strong> {{ profile.get('phone') }}</li>{% endif %}
+            {% if profile.get('allergies') %}<li><strong>Allergies:</strong> {{ profile.get('allergies') }}</li>{% endif %}
+            {% if profile.get('medical_history') %}<li><strong>Medical History:</strong> {{ profile.get('medical_history') }}</li>{% endif %}
+            {% if profile.get('current_medications') %}<li><strong>Current Medications:</strong> {{ profile.get('current_medications') }}</li>{% endif %}
+            {% if profile.get('emergency_contact') %}<li><strong>Emergency Contact:</strong> {{ profile.get('emergency_contact') }}</li>{% endif %}
+          </ul>
+        {% else %}
+          <p class="text-muted small">No profile details saved yet.</p>
+        {% endif %}
+        <a class="btn btn-primary btn-sm" href="/profile">View / Edit Profile</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
