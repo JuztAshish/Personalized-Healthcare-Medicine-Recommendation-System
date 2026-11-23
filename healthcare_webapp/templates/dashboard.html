@@ -35,4 +35,30 @@
     </div>
   </div>
 </div>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="h5">My Recent Activity</h2>
+    {% if my_logs %}
+      <div class="table-responsive">
+        <table class="table table-sm table-striped mb-0">
+          <thead>
+            <tr><th>Time (UTC)</th><th>Action</th><th>Details</th></tr>
+          </thead>
+          <tbody>
+            {% for log in my_logs %}
+              <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.details }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted small mb-0">No recent activity yet.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

@@ -2,13 +2,14 @@
 # Task 3B: Backend Authentication (MongoDB, sessions, admin rules)
 # Fresh code, not copied from medicare/ reference.
 
+from datetime import datetime, timezone
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from config import SECRET_KEY
-from db import users, ping_db
+from db import users, activity_logs, ping_db
 
 PROFILE_FIELDS = [
     ("age", "Age"),
@@ -23,6 +24,35 @@ PROFILE_FIELDS = [
 
 GENDER_CHOICES = ["", "Male", "Female", "Other", "Prefer not to say"]
 BLOOD_GROUP_CHOICES = ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+
+
+def log_activity(action, details="", email=None, name=None, role=None):
+    """Store a simple activity log entry in MongoDB. Logging must not break user flow."""
+    try:
+        current = session.get("user", {}) if session else {}
+        doc = {
+            "email": (email or current.get("email") or "").lower(),
+            "name": name or current.get("name") or "",
+            "role": role or current.get("role") or "",
+            "action": action,
+            "details": details,
+            "timestamp": datetime.now(timezone.utc),
+        }
+        activity_logs.insert_one(doc)
+    except Exception:
+        pass
+
+
+def format_log(log):
+    ts = log.get("timestamp")
+    return {
+        "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S UTC") if ts else "",
+        "name": log.get("name", ""),
+        "email": log.get("email", ""),
+        "role": log.get("role", ""),
+        "action": log.get("action", ""),
+        "details": log.get("details", ""),
+    }
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
@@ -85,6 +115,7 @@ def register():
                 "password_hash": generate_password_hash(password),
                 "role": "user",
             })
+            log_activity("register", "New user registered", email=email, name=name, role="user")
             flash("Account created successfully. Please log in.", "success")
             return redirect(url_for("login"))
         except DuplicateKeyError:
@@ -127,6 +158,7 @@ def login():
         # - Selecting User allows login as user when credentials match (even if account is admin).
         if selected_role == "admin":
             if user.get("role") != "admin":
+                log_activity("login_denied_admin", "User attempted admin login without admin privileges", email=user.get("email", email), name=user.get("name", name), role=user.get("role", "user"))
                 flash("Not authorized as admin.", "danger")
                 return render_template("login.html")
             effective_role = "admin"
@@ -141,6 +173,7 @@ def login():
             "email": user["email"],
             "role": effective_role,
         }
+        log_activity("login_success", f"Logged in as {effective_role}", email=user["email"], name=user["name"], role=effective_role)
         flash(f"Logged in as {effective_role}.", "success")
         return redirect(url_for("admin_panel" if effective_role == "admin" else "dashboard"))
 
@@ -149,6 +182,8 @@ def login():
 
 @app.route("/logout")
 def logout():
+    current = session.get("user", {})
+    log_activity("logout", "User logged out", email=current.get("email"), name=current.get("name"), role=current.get("role"))
     session.pop("user", None)
     flash("You have been logged out.", "info")
     return redirect(url_for("home"))
@@ -158,13 +193,16 @@ def logout():
 @login_required
 def dashboard():
     profile = {}
+    my_logs = []
+    email = session["user"]["email"]
     try:
-        user = users.find_one({"email": session["user"]["email"]}, {"profile": 1})
+        user = users.find_one({"email": email}, {"profile": 1})
         if user:
             profile = user.get("profile") or {}
+        my_logs = [format_log(l) for l in activity_logs.find({"email": email}).sort("timestamp", -1).limit(10)]
     except PyMongoError as e:
         flash(f"Database error: {e}", "danger")
-    return render_template("dashboard.html", profile=profile)
+    return render_template("dashboard.html", profile=profile, my_logs=my_logs)
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -207,6 +245,7 @@ def profile():
 
         try:
             users.update_one({"email": email}, {"$set": {"profile": profile_data}})
+            log_activity("profile_update", "User updated profile")
             flash("Profile saved successfully.", "success")
             return redirect(url_for("profile"))
         except PyMongoError as e:
@@ -248,10 +287,22 @@ def promote_user():
             elif result.modified_count == 0:
                 flash("User is already an admin.", "info")
             else:
+                log_activity("admin_promote", f"Promoted {email} to admin")
                 flash(f"User {email} promoted to admin.", "success")
         except PyMongoError as e:
             flash(f"Database error: {e}", "danger")
     return render_template("promote.html")
+
+
+@app.route("/admin/activity")
+@admin_required
+def admin_activity():
+    logs = []
+    try:
+        logs = [format_log(l) for l in activity_logs.find().sort("timestamp", -1).limit(100)]
+    except PyMongoError as e:
+        flash(f"Database error: {e}", "danger")
+    return render_template("activity.html", logs=logs)
 
 
 if __name__ == "__main__":
