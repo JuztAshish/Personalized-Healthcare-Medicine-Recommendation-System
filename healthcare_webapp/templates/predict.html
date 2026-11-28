@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <h1 class="h4">Disease Prediction &amp; Medicine Recommendation</h1>
+        <p class="text-muted small">Enter symptom names (comma-separated, matching dataset symptom keys). This is an academic prototype - not a medical diagnosis or prescription.</p>
+        <form method="post" action="/predict">
+          <div class="mb-3">
+            <label for="symptoms" class="form-label">Symptoms</label>
+            <textarea class="form-control" id="symptoms" name="symptoms" rows="4" placeholder="e.g. anxiety_and_nervousness, depression" required>{{ form_data.get('symptoms', '') }}</textarea>
+            <div class="form-text">Use symptom keys like <code>joint_pain, knee_pain</code> or <code>shortness_of_breath, cough</code>.</div>
+          </div>
+          <div class="mb-3">
+            <label for="allergies" class="form-label">Known Allergies (optional)</label>
+            <input type="text" class="form-control" id="allergies" name="allergies" value="{{ form_data.get('allergies', '') }}" placeholder="e.g. Aspirin, Amoxycillin">
+          </div>
+          <div class="mb-3">
+            <label for="conditions" class="form-label">Existing Conditions (optional)</label>
+            <input type="text" class="form-control" id="conditions" name="conditions" value="{{ form_data.get('conditions', '') }}" placeholder="e.g. Hypertension">
+          </div>
+          <div class="mb-3">
+            <label for="top_k" class="form-label">Top Recommendations</label>
+            <input type="number" class="form-control" id="top_k" name="top_k" min="1" max="20" value="{{ form_data.get('top_k', '5') }}">
+          </div>
+          <button type="submit" class="btn btn-primary">Predict &amp; Recommend</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5">Results</h2>
+        <div class="alert alert-warning small" role="alert">
+          <strong>Disclaimer:</strong> {{ clinical_disclaimer }}
+          <br><strong>Note:</strong> Prediction/confidence is a model signal only, not medical certainty or diagnosis.
+        </div>
+
+        {% if result %}
+          {% if result.get('predicted_disease') %}
+            <p class="mb-1"><strong>Predicted Disease:</strong> {{ result.get('predicted_disease') }}</p>
+            <p class="mb-3"><strong>Prediction Confidence (model signal):</strong> {{ result.get('prediction_confidence', result.get('confidence', 'N/A')) }}</p>
+          {% endif %}
+
+          {% if result.get('recommendations') %}
+            <p class="small text-muted">Found {{ result.get('count', result.get('recommendations')|length) }} recommendation(s).</p>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>Medicine</th>
+                    <th>Similarity</th>
+                    <th>Explanation</th>
+                    <th>Safety</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for rec in result.get('recommendations', []) %}
+                    {% set safety = rec.get('safety', {}) %}
+                    <tr>
+                      <td>
+                        <strong>{{ rec.get('medicine_name', 'N/A') }}</strong>
+                        {% if rec.get('composition') %}<div class="small text-muted">{{ rec.get('composition') }}</div>{% endif %}
+                      </td>
+                      <td>{{ rec.get('similarity_score', 'N/A') }}</td>
+                      <td class="small">{{ rec.get('match_explanation', '') }}</td>
+                      <td class="small">
+                        {% if safety.get('allergy_detected') %}
+                          <div class="text-danger"><strong>Allergy alert:</strong> {{ safety.get('allergy_alert', 'Match detected') }}</div>
+                        {% endif %}
+                        {% if safety.get('preliminary_condition_warning') %}
+                          <div class="text-warning"><strong>Condition warning:</strong> {{ safety.get('condition_warning_text', 'Possible precaution') }}</div>
+                        {% endif %}
+                        {% if not safety.get('allergy_detected') and not safety.get('preliminary_condition_warning') %}
+                          <span class="text-muted">No alert flagged by preliminary checks</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% elif result.get('status') == 'error' %}
+            <div class="alert alert-danger">{{ result.get('message', 'Unable to generate recommendations.') }}</div>
+          {% else %}
+            <div class="alert alert-info">No recommendations found for this query. Try different symptom names (use dataset symptom keys like <code>shortness_of_breath</code>).</div>
+          {% endif %}
+        {% else %}
+          <p class="text-muted mb-0">Submit symptoms to see predicted disease and medicine recommendations.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
