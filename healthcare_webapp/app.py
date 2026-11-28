@@ -10,6 +10,7 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from config import SECRET_KEY
 from db import users, activity_logs, ping_db
+from services.flask_adapter import CLINICAL_DISCLAIMER, predict_and_recommend
 
 PROFILE_FIELDS = [
     ("age", "Age"),
@@ -266,6 +267,41 @@ def profile():
     )
 
 
+@app.route("/predict", methods=["GET", "POST"])
+@login_required
+def predict():
+    result = None
+    form_data = {"symptoms": "", "allergies": "", "conditions": "", "top_k": "5"}
+    if request.method == "POST":
+        form_data = {
+            "symptoms": request.form.get("symptoms", "").strip(),
+            "allergies": request.form.get("allergies", "").strip(),
+            "conditions": request.form.get("conditions", "").strip(),
+            "top_k": request.form.get("top_k", "5").strip() or "5",
+        }
+        if not form_data["symptoms"]:
+            flash("Please enter at least one symptom.", "danger")
+            return render_template("predict.html", result=None, form_data=form_data, clinical_disclaimer=CLINICAL_DISCLAIMER)
+
+        try:
+            result = predict_and_recommend(
+                symptoms=form_data["symptoms"],
+                allergies=form_data["allergies"],
+                conditions=form_data["conditions"],
+                top_k=form_data["top_k"],
+                filter_allergies=True,
+            )
+            pred = result.get("predicted_disease") or "unknown"
+            log_activity("prediction_request", f"Predicted: {pred}; recommendations: {result.get('count', 0)}")
+            if result.get("status") == "error":
+                flash(result.get("message", "Unable to generate prediction."), "danger")
+        except Exception as e:
+            flash(f"Prediction service error: {e}", "danger")
+            result = None
+
+    return render_template("predict.html", result=result, form_data=form_data, clinical_disclaimer=CLINICAL_DISCLAIMER)
+
+
 @app.route("/admin")
 @admin_required
 def admin_panel():
@@ -303,6 +339,25 @@ def admin_activity():
     except PyMongoError as e:
         flash(f"Database error: {e}", "danger")
     return render_template("activity.html", logs=logs)
+
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    """Admin-only view of users and their profile data. Password hashes are never shown."""
+    user_rows = []
+    try:
+        for u in users.find({}, {"password_hash": 0}).sort("email", 1):
+            profile = u.get("profile") or {}
+            user_rows.append({
+                "name": u.get("name", ""),
+                "email": u.get("email", ""),
+                "role": u.get("role", ""),
+                "profile": profile,
+            })
+    except PyMongoError as e:
+        flash(f"Database error: {e}", "danger")
+    return render_template("admin_users.html", users=user_rows)
 
 
 if __name__ == "__main__":
